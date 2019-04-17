@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using patient.demography.helpers;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace patient.demography.business
 {
@@ -46,7 +47,7 @@ namespace patient.demography.business
             return patientphonenumber != null;
         }
 
-        public IEnumerable<patientphonenumber> getallpatientphonenumbers()
+        public List<patientphonenumber> getallpatientphonenumbers()
         {
             string cmd = @"SELECT [patientphonenumberid]
                                 ,[patientid]
@@ -56,10 +57,10 @@ namespace patient.demography.business
                           FROM [dbo].[patientphonenumber]
                          WHERE [isdeleted] = @isdeleted ";
 
-            return _application.Connection.Query<patientphonenumber>(cmd, new { isdeleted = false }, Transaction: _application.Transaction);
+            return _application.Connection.Query<patientphonenumber>(cmd, new { isdeleted = false }, Transaction: _application.Transaction).ToList();
         }
 
-        public IEnumerable<patientphonenumber> getallpatientphonenumbers(int patientid)
+        public List<patientphonenumber> getallpatientphonenumbers(int patientid)
         {
             string cmd = @"SELECT [patientphonenumberid]
                                 ,[patientid]
@@ -67,9 +68,9 @@ namespace patient.demography.business
                                 ,[phonenumber]
                                 ,[isdeleted]
                           FROM [dbo].[patientphonenumber]
-                         WHERE [patientid] = @patientid, [isdeleted] = @isdeleted ";
+                         WHERE [patientid] = @patientid AND [isdeleted] = @isdeleted ";
 
-            return _application.Connection.Query<patientphonenumber>(cmd, new { isdeleted = false, patientid }, Transaction: _application.Transaction);
+            return _application.Connection.Query<patientphonenumber>(cmd, new { isdeleted = false, patientid }, Transaction: _application.Transaction).ToList();
         }
 
         public griddata getpatients(griddata griddata)

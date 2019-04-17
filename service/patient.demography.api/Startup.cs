@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Net.Http.Headers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using System;
 
 namespace patient.demography.api
 {
@@ -20,31 +23,46 @@ namespace patient.demography.api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var appSettingsSection = Configuration.GetSection("AppSettings");
-            services.Configure<AppSettings>(appSettingsSection);
-            var appSettings = appSettingsSection.Get<AppSettings>();
-            services.AddMvc(options =>
+            var appSettingsSection = Configuration.GetSection("ConnectionStrings");
+            services.Configure<ConnectionStrings>(appSettingsSection);
+            services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddLogging(loggingBuilder =>
             {
-
-                options.OutputFormatters.Clear();
-                options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
-
-                options.FormatterMappings.SetMediaTypeMappingForFormat
-                    ("xml", MediaTypeHeaderValue.Parse("application/xml"));
-
-
-
-            }).AddXmlSerializerFormatters().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                loggingBuilder.AddDebug();
+            });
+            services.AddMvc(config =>
+            {
+                config.RespectBrowserAcceptHeader = true;
+                config.ReturnHttpNotAcceptable = true;
+                config.OutputFormatters.Add(new XMLOutputFormatter());
+                config.InputFormatters.Add(new XMLOutputFormatter());
+            })
+            .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
 
+            app.Use(async (httpContext, next) =>
+            {
+                try
+                {
+                    await next();
+                }
+                catch (Exception e)
+                {
+                }
+            });
+            app.UseStaticFiles();
             app.UseMvc();
         }
     }

@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 
 namespace patient.demography.helpers
 {
-    public class dbcontext
+    public class dbcontext : IDisposable
     {
         private bool _isDisposed;
         private SqlConnection _mainConnection;
