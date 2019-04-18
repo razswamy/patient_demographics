@@ -43,14 +43,7 @@ namespace patient.demography.api
             {
                 try
                 {
-                    Type[] types = new Type[] { typeof(response), typeof(patient), typeof(patientphonenumber), typeof(griddata), typeof(List<string>), typeof(gendertype), typeof(phonenumbertype) };
-                    var xmldeserializer = new XmlSerializer(typeof(T), types);
-                    var stringWriter = new StringWriter();
-                    using (var writer = XmlWriter.Create(stringWriter))
-                    {
-                        xmlserializer.Serialize(writer, t);
-                        buffer = new StringBuilder(stringWriter.ToString());
-                    }
+                    
 
 
                     var line = await reader.ReadLineAsync();

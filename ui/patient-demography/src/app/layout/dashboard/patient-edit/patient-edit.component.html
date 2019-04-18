@@ -1,0 +1,78 @@
+<div>
+  <h2 class="text-muted">Edit Patient </h2>
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label for="name">Forenames</label>
+                <input maxlength="50" [(ngModel)]="patient.forenames" class="form-control" placeholder="Enter forename"
+                  type="text">
+              </div>
+              <div class="form-group">
+                <label for="name">Surname</label>
+                <input maxlength="50" [(ngModel)]="patient.surname" class="form-control" placeholder="Enter surname"
+                  type="text">
+              </div>
+              <div class="form-group">
+                <label for="name">Date of birth</label>
+                <input maxlength="50" [(ngModel)]="patient.dateofbirth" class="form-control"
+                  placeholder="Enter date of birth" type="date">
+              </div>
+              <div class="form-group">
+                <label for="name">Gender</label>
+                <select [(ngModel)]="patient.gender" class="form-control form-control-sm" placeholder="Select gender">
+                  <option *ngFor="let gen of gender" [ngValue]="gen.value">
+                    {{gen.name}}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="name">Phone numbers</label>
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th scope="col">#.</th>
+                      <th scope="col">Phone number type</th>
+                      <th scope="col">Phone number</th>
+                      <th scope="col"><button class="btn btn-success btn-sm" (click)="addphonenumber()"><i
+                            class="fa fa-plus"></i></button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let phonenumber of patient.patientphonenumbers;let i = index">
+                      <td>{{(i+1)}}</td>
+                      <td>
+                        <select [(ngModel)]="phonenumber.phonenumbertype" class="form-control form-control-sm"
+                          placeholder="Select phone number type">
+                          <option *ngFor="let phonenumbertype of phonenumbertypes" [ngValue]="phonenumbertype.value">
+                            {{phonenumbertype.name}}</option>
+                        </select>
+                      </td>
+                      <td>
+                        <input maxlength="15" [(ngModel)]="phonenumber.phonenumber" class="form-control"
+                          placeholder="Enter phone number" type="tel">
+                      </td>
+                      <td>
+                        <button class="btn btn-danger btn-sm" (click)="removephonenumber(i)"><i
+                            class="fa fa-trash"></i></button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-success" type="button" (click)="addpatient()">
+            Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

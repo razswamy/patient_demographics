@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -30,13 +29,25 @@ namespace patient.demography.api
             {
                 loggingBuilder.AddDebug();
             });
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                    });
+            });
             services.AddMvc(config =>
             {
-                config.RespectBrowserAcceptHeader = true;
-                config.ReturnHttpNotAcceptable = true;
-                config.OutputFormatters.Add(new XMLOutputFormatter());
-                config.InputFormatters.Add(new XMLOutputFormatter());
-            })
+                /* config.RespectBrowserAcceptHeader = true;
+                 config.ReturnHttpNotAcceptable = true;
+                 config.OutputFormatters.Add(new XMLOutputFormatter());
+                 config.InputFormatters.Add(new XMLInputFormatter());*/
+            }).AddXmlDataContractSerializerFormatters().AddXmlSerializerFormatters()
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -62,6 +73,7 @@ namespace patient.demography.api
                 {
                 }
             });
+            app.UseCors("AllowAll");
             app.UseStaticFiles();
             app.UseMvc();
         }

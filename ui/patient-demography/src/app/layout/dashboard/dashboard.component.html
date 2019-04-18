@@ -1,0 +1,57 @@
+<div>
+  <h2 class="text-muted">Patients </h2>
+  <a class="btn btn-sm btn-primary mr-2" [routerLink]="['/dashboard/patient-add']">Add new patient</a>
+  <div class="row">
+    <div class="col-12">
+      <data-table id="my-table" [noDataMessage]="'No Data Available....'" [showTitle]="false" [title]="'Patients'"
+        [items]="data" [selectColumn]="true" [multiSelect]="true" [showReloading]="true" [substituteRows]="false"
+        [pageLimits]="config.pageLimits" [indexColumn]="false" [itemCount]="config.count" (reload)="reloaddata($event)"
+        (rowDoubleClick)="rowDoubleClick($event)" [expandableRows]="true">
+        <ng-template #dataTableExpand let-item="item">
+          <div class="row">
+            <div class="col-sm-12">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th scope="col">Phone number type</th>
+                    <th scope="col">Phone number</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let phonenumber of item.patientphonenumbers">
+                    <td>
+                      {{phonenumbertag(phonenumber.phonenumbertype)}}
+                    </td>
+                    <td>
+                      {{phonenumber.phonenumber}}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </ng-template>
+        <data-table-column *ngFor="let column of columns" [property]="column.key" [header]="column.title"
+          [sortable]="sortable">
+        </data-table-column>
+        <data-table-column [property]="dateofbrth" [header]="'Date of birth'" [sortable]="sortable">
+          <ng-template #dataTableCell let-item="item">
+            {{item.dateofbirth | date:"MMMM/dd/yyyy"}}
+          </ng-template>
+        </data-table-column>
+        <data-table-column [property]="gender" [header]="'Gender'" [sortable]="sortable">
+          <ng-template #dataTableCell let-item="item">
+            {{gendertag(item.gender)}}
+          </ng-template>
+        </data-table-column>
+        <data-table-column header="Actions" [width]="150">
+          <ng-template #dataTableCell let-item="item">
+            <a class="btn btn-sm btn-primary mr-2" [routerLink]="['/dashboard/patient-edit',  item.patientid]">Edit</a>
+            <button class="btn btn-sm btn-danger mr-2" tag="button" (click)="deletepatient(item.patientid)">
+              Delete</button>
+          </ng-template>
+        </data-table-column>
+      </data-table>
+    </div>
+  </div>
+</div>

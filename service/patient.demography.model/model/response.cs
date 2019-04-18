@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Xml.Serialization;
+﻿using System.Collections.Generic;
 
 namespace patient.demography
 {
-    [Serializable()]
-    [System.Xml.Serialization.XmlRoot("response")]
     public class response
     {
         /// <summary>
@@ -25,8 +20,6 @@ namespace patient.demography
         /// </value>
         ///
 
-        [XmlElement("data")]
-        [XmlType(]
         public object data { get; set; }
 
         /// <summary>
@@ -37,7 +30,6 @@ namespace patient.demography
         /// </value>
         ///
 
-        [XmlElement("error")]
         public bool error { get { return (errormessage ?? new List<string>()).Count > 0; } }
 
         /// <summary>
@@ -47,8 +39,6 @@ namespace patient.demography
         /// The error message.
         /// </value>
         ///
-        [XmlArray("errormessage")]
-        [XmlArrayItem("errormessage", typeof(string))]
         public List<string> errormessage { get; set; }
     }
 }

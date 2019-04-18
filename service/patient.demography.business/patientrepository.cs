@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using patient.demography.helpers;
+using System;
 using System.Collections.Generic;
 
 namespace patient.demography.business
@@ -25,7 +26,7 @@ namespace patient.demography.business
                            ,[isdeleted]) OUTPUT INSERTED.*
                             VALUES
                            (@forenames
-                           ,@surname
+                           ,@surname, @gender
                            ,@dateofbirth
                            ,@isdeleted); ";
             patient = _application.Connection.QuerySingle<patient>(cmd, input, Transaction: _application.Transaction);
@@ -101,7 +102,7 @@ namespace patient.demography.business
                 int.TryParse((griddata.rows ?? "").ToString(), out rowcount);
                 rowcount = rowcount > 0 ? rowcount : 10;
                 tempdata = new griddata();
-                string wherestatement = (griddata.search ? " WHERE [isdeleted] = @isdeleted AND ( [forenames] LIKE @searchkey OR [surname] LIKE @searchkey OR [forenames] LIKE @searchkey OR [gender] = @searchkey ) " : "");
+                string wherestatement = " WHERE [isdeleted] = @isdeleted " + (griddata.search ? " AND ( [forenames] LIKE @searchkey OR [surname] LIKE @searchkey OR [forenames] LIKE @searchkey OR [gender] = @searchkey ) " : "");
 
                 string countcmd = @"SELECT count([patientid]) as patientcount FROM [patient] " + wherestatement;
 
@@ -150,53 +151,86 @@ namespace patient.demography.business
             string cmd = @"UPDATE [dbo].[patient]
                                SET [isdeleted] = @isdeleted
                              WHERE [patientid] = @patientid ";
-            return _application.Connection.Execute(cmd, new { isdeleted = false, patientid }, Transaction: _application.Transaction).Equals(1);
+            return _application.Connection.Execute(cmd, new { isdeleted = true, patientid }, Transaction: _application.Transaction).Equals(1);
         }
 
         public bool validatepatient(patient patient, out List<string> errors)
         {
-            errors = new List<string>();
+            patientphonenumberrepository objpatientphonenumberrepository = null;
 
-            if (patient.forenames.IsTrulyEmpty())
+            try
             {
-                errors.Add("Enter forename");
-            }
-            else
-            {
-                patient.forenames = patient.forenames.TrulyTrim();
-                if (patient.forenames.Length < 3)
-                {
-                    errors.Add("Forename must be at least 3 characters");
-                }
-                if (patient.forenames.Length < 3)
-                {
-                    errors.Add("Forename cannot be more than 50 characters");
-                }
-            }
+                errors = new List<string>();
 
-            if (patient.surname.IsTrulyEmpty())
-            {
-                errors.Add("Enter surname");
-            }
-            else
-            {
-                patient.surname = patient.surname.TrulyTrim();
-                if (patient.surname.Length < 3)
+                if (patient.forenames.IsTrulyEmpty())
                 {
-                    errors.Add("Surname must be at least 3 characters");
+                    errors.Add("Enter forename");
                 }
-                if (patient.surname.Length < 3)
+                else
                 {
-                    errors.Add("Surname cannot be more than 50 characters");
+                    patient.forenames = patient.forenames.TrulyTrim();
+                    if (patient.forenames.Length < 3)
+                    {
+                        errors.Add("Forename must be at least 3 characters");
+                    }
+                    if (patient.forenames.Length < 3)
+                    {
+                        errors.Add("Forename cannot be more than 50 characters");
+                    }
                 }
-            }
 
-            if (patient.gendertype == gendertype.none)
+                if (patient.surname.IsTrulyEmpty())
+                {
+                    errors.Add("Enter surname");
+                }
+                else
+                {
+                    patient.surname = patient.surname.TrulyTrim();
+                    if (patient.surname.Length < 3)
+                    {
+                        errors.Add("Surname must be at least 3 characters");
+                    }
+                    if (patient.surname.Length < 3)
+                    {
+                        errors.Add("Surname cannot be more than 50 characters");
+                    }
+                }
+
+                if (patient.gendertype == gendertype.none)
+                {
+                    errors.Add("Select gender");
+                }
+
+                if (patient.dateofbirth == DateTime.MinValue)
+                {
+                    errors.Add("Enter date of birth");
+                }
+
+                for (var x = 0; x < patient.patientphonenumbers.Count; x++)
+                {
+                    objpatientphonenumberrepository = new patientphonenumberrepository(_application, _utcoffset);
+                    if (objpatientphonenumberrepository.validatepatientphonenumber(patient.patientphonenumbers[x], out List<string> temperror))
+                    {
+                        foreach (var x1 in temperror)
+                        {
+                            errors.Add($"Phone number #{x + 1}: {x1}");
+                        }
+                    }
+                }
+
+
+
+                return errors.Count > 0;
+            }
+            catch (System.Exception)
             {
-                errors.Add("Select gender");
-            }
 
-            return errors.Count > 0;
+                throw;
+            }
+            finally
+            {
+                objpatientphonenumberrepository = null;
+            }
         }
     }
 }
